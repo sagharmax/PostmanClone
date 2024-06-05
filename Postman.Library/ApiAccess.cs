@@ -1,13 +1,33 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace Postman.Library;
 
 public class ApiAccess : IApiAccess
 {
     private readonly HttpClient _httpClient = new();
-    public async Task<string> CallApiAsync(string url, bool formatOutput = true, HttpAction httpAction = HttpAction.GET)
+
+    public async Task<string> CallApiAsync(string url, string content, HttpAction action = HttpAction.GET, bool formatOutput = true)
     {
-        var response = await _httpClient.GetAsync(url);
+        StringContent? stringContent = new(content, Encoding.UTF8, "application/json");
+        return await CallApiAsync(url, new StringContent(content), action, formatOutput);
+    }
+
+    public async Task<string> CallApiAsync(string url, HttpContent? content = null, HttpAction httpAction = HttpAction.GET, bool formatOutput = true)
+    {
+        HttpResponseMessage? response;
+        switch (httpAction)
+        {
+            case HttpAction.GET:
+                response = await _httpClient.GetAsync(url);
+                break;
+            case HttpAction.POST:
+                response = await _httpClient.PostAsync(url, content);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(httpAction), httpAction, null);
+        }
+
         if (response.IsSuccessStatusCode)
         {
             string json = await response.Content.ReadAsStringAsync();
