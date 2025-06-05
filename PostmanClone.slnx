@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Postman.Library/Postman.Library.csproj" />
+  <Project Path="Postman.UI/Postman.UI.csproj" />
+</Solution>
